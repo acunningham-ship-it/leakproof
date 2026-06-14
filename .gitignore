@@ -4,6 +4,6 @@ __pycache__/
 dist/
 build/
 *.egg-info/
-.tripwire/
+.leakproof/
 audit.log
 .DS_Store

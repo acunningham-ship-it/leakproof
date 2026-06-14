@@ -1,4 +1,4 @@
-"""Tests for tripwire.audit + tripwire.audit_demo (L3 audit lane).
+"""Tests for leakproof.audit + leakproof.audit_demo (L3 audit lane).
 
 Runs under pytest OR standalone: `python tests/test_audit.py`.
 """
@@ -14,8 +14,8 @@ from pathlib import Path
 # allow standalone run without install
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tripwire import audit, audit_demo  # noqa: E402
-from tripwire.audit import AuditEvent, Finding, aggregate, categorize  # noqa: E402
+from leakproof import audit, audit_demo  # noqa: E402
+from leakproof.audit import AuditEvent, Finding, aggregate, categorize  # noqa: E402
 
 
 def test_categorize():

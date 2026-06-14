@@ -1,4 +1,4 @@
-"""Adversarial leak corpus for tripwire's scanner (QA lane / worker-3).
+"""Adversarial leak corpus for leakproof's scanner (QA lane / worker-3).
 
 This is the credibility backbone of a DLP tool: a security scanner is only as good as its
 false-PASS rate (a real secret it lets through) and its false-POSITIVE rate (clean code it

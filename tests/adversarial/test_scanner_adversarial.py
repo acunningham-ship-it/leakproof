@@ -15,7 +15,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 
 scanner = pytest.importorskip(
-    "tripwire.scanner",
+    "leakproof.scanner",
     reason="scanner lane not merged yet — corpus + harness are ready and will gate it",
 )
 

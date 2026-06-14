@@ -1,4 +1,4 @@
-# tripwire — adversarial QA lane
+# leakproof — adversarial QA lane
 
 The credibility backbone of a DLP tool. A leak scanner is judged on two numbers:
 
@@ -55,4 +55,4 @@ uv run python tests/adversarial/scorecard.py
 ## Status
 
 Corpus + harness + gate: **done, green** (self-tests pass; scanner gate armed & skipping until
-opus-2's `tripwire.scanner.scan` merges). Then it's a hard pre-merge gate. Owner: worker-3.
+opus-2's `leakproof.scanner.scan` merges). Then it's a hard pre-merge gate. Owner: worker-3.

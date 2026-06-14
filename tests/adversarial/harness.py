@@ -87,7 +87,7 @@ def format_report(rep: Report) -> str:
     leaks, decoys = rep.leaks, rep.decoys
     lines = []
     lines.append("=" * 64)
-    lines.append("  tripwire scanner — adversarial scorecard")
+    lines.append("  leakproof scanner — adversarial scorecard")
     lines.append("=" * 64)
     lines.append(f"  leaks caught     : {len(rep.caught)}/{len(leaks)}")
     lines.append(f"  false-pass       : {len(rep.false_pass)}   (MUST be 0 — a real secret slipped through)")

@@ -1,16 +1,16 @@
-"""tripwire CLI — OWNER: worker-claude (lane: cli + packaging).
+"""leakproof CLI — OWNER: worker-claude (lane: cli + packaging).
 
-The single `tripwire` entry point. Routes to the lane modules, which it imports
+The single `leakproof` entry point. Routes to the lane modules, which it imports
 lazily so the CLI runs today and each subcommand lights up the moment its lane
 lands. Every lane just needs to expose the small entry function documented here.
 
 Subcommands + the entry-point contract each lane implements:
-  tripwire scan <path...>     scanner.scan(text, ctx) / scanner.redact(text, findings)   [worker-2]
-  tripwire run -- <tool>...    adapters.run(tool, argv, proxy_url) -> int                 [adapters + proxy]
-  tripwire proxy               proxy.serve(host, port) -> int                              [worker-opus-5]
-  tripwire watch               tui.watch(audit_path=None) -> int                           [worker-opus-2]
-  tripwire install-hook        hook.install(repo=".") -> int / hook.uninstall(repo=".")    [hook surface]
-  tripwire version
+  leakproof scan <path...>     scanner.scan(text, ctx) / scanner.redact(text, findings)   [worker-2]
+  leakproof run -- <tool>...    adapters.run(tool, argv, proxy_url) -> int                 [adapters + proxy]
+  leakproof proxy               proxy.serve(host, port) -> int                              [worker-opus-5]
+  leakproof watch               tui.watch(audit_path=None) -> int                           [worker-opus-2]
+  leakproof install-hook        hook.install(repo=".") -> int / hook.uninstall(repo=".")    [hook surface]
+  leakproof version
 
 Exit codes: 0 ok / no leaks · 1 usage or runtime error · 2 leaks found (scan/hook).
 """
@@ -78,14 +78,14 @@ def print_findings(findings: list, source: str = "") -> None:
 
 def _lane(modname: str, fn: str, owner: str) -> Callable | None:
     try:
-        mod = __import__(f"tripwire.{modname}", fromlist=[fn])
+        mod = __import__(f"leakproof.{modname}", fromlist=[fn])
     except Exception as e:  # noqa: BLE001 - surface any import error cleanly
-        print(_c(f"tripwire: lane '{modname}' failed to import ({e})", "red"), file=sys.stderr)
+        print(_c(f"leakproof: lane '{modname}' failed to import ({e})", "red"), file=sys.stderr)
         return None
     impl = getattr(mod, fn, None)
     if impl is None:
         print(
-            _c(f"tripwire: `{modname}.{fn}()` not implemented yet "
+            _c(f"leakproof: `{modname}.{fn}()` not implemented yet "
                f"(lane owner: {owner}). The CLI is wired; the lane is in progress.",
                "yellow"),
             file=sys.stderr,
@@ -108,7 +108,7 @@ def _sev_rank(sev) -> int:
 
 def cmd_scan(args: argparse.Namespace) -> int:
     if not args.path:
-        print("tripwire scan: give one or more file paths", file=sys.stderr)
+        print("leakproof scan: give one or more file paths", file=sys.stderr)
         return 1
     scan = _lane("scanner", "scan", "worker-2")
     if scan is None:
@@ -121,7 +121,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
             with open(path, "r", encoding="utf-8", errors="replace") as fh:
                 text = fh.read()
         except OSError as e:
-            print(_c(f"tripwire: cannot read {path}: {e}", "red"), file=sys.stderr)
+            print(_c(f"leakproof: cannot read {path}: {e}", "red"), file=sys.stderr)
             return 1
         findings = scan(text, {"path": path})
         print(_c(f"\n{path}", "bold"))
@@ -148,11 +148,11 @@ def _import_proxy():
         return proxy
     except ImportError as e:
         if "aiohttp" in str(e):
-            print(_c("tripwire: the proxy needs aiohttp — install it with "
+            print(_c("leakproof: the proxy needs aiohttp — install it with "
                      "`uvx 'leakproof[proxy]'` (or `pip install 'leakproof[proxy]'`).", "yellow"),
                   file=sys.stderr)
         else:
-            print(_c(f"tripwire: proxy lane unavailable ({e}).", "yellow"), file=sys.stderr)
+            print(_c(f"leakproof: proxy lane unavailable ({e}).", "yellow"), file=sys.stderr)
         return None
 
 
@@ -160,7 +160,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     # argparse.REMAINDER keeps a leading "--"; drop it so cmd[0] is the tool.
     cmd = [a for a in args.cmd if a != "--"] if args.cmd else []
     if not cmd:
-        print("tripwire run: nothing to run. usage: tripwire run -- <tool> [args...]",
+        print("leakproof run: nothing to run. usage: leakproof run -- <tool> [args...]",
               file=sys.stderr)
         return 1
     run = _lane("adapters", "run", "adapters surface")
@@ -170,7 +170,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     # cli↔proxy seam (opus-5's shipped API): start the proxy on a daemon thread,
     # point the child at bp.base_url, stop it when the child exits. --no-proxy skips
-    # auto-start (you ran `tripwire proxy` yourself / one's already up at --proxy-url).
+    # auto-start (you ran `leakproof proxy` yourself / one's already up at --proxy-url).
     bp = None
     target = args.proxy_url
     if not args.no_proxy:
@@ -182,12 +182,12 @@ def cmd_run(args: argparse.Namespace) -> int:
                 bp = start_bg(host, port, mode=args.mode)
                 target = getattr(bp, "base_url", args.proxy_url)
             except Exception as e:  # noqa: BLE001
-                print(_c(f"tripwire: could not start proxy ({e}); assuming one is "
+                print(_c(f"leakproof: could not start proxy ({e}); assuming one is "
                          f"already running at {args.proxy_url}", "yellow"), file=sys.stderr)
                 bp = None
         elif proxy is not None:
-            print(_c(f"tripwire: proxy.start_background not found — pointing {tool} at "
-                     f"{args.proxy_url} (start it with `tripwire proxy`).", "yellow"),
+            print(_c(f"leakproof: proxy.start_background not found — pointing {tool} at "
+                     f"{args.proxy_url} (start it with `leakproof proxy`).", "yellow"),
                   file=sys.stderr)
     try:
         # adapters.run expects argv = the FULL command (argv[0] is the tool binary it
@@ -195,7 +195,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         return int(run(tool=tool, argv=cmd, proxy_url=target))
     except FileNotFoundError as e:
         # tool binary not on PATH — adapters raises by design; fail gracefully, no traceback
-        print(_c(f"tripwire run: {e}", "red"), file=sys.stderr)
+        print(_c(f"leakproof run: {e}", "red"), file=sys.stderr)
         return 1
     finally:
         stop = getattr(bp, "stop", None)
@@ -211,7 +211,7 @@ def cmd_proxy(args: argparse.Namespace) -> int:
     serve = getattr(proxy, "serve", None) if proxy else None
     if serve is None:
         if proxy is not None:
-            print(_c("tripwire: proxy.serve not implemented yet (lane owner: worker-opus-5)",
+            print(_c("leakproof: proxy.serve not implemented yet (lane owner: worker-opus-5)",
                      "yellow"), file=sys.stderr)
         return 1
     return int(serve(args.host, args.port, mode=args.mode))
@@ -242,7 +242,7 @@ def cmd_demo_log(_args: argparse.Namespace) -> int:
 
 
 def cmd_version(_args: argparse.Namespace) -> int:
-    print(f"tripwire {__version__}")
+    print(f"leakproof {__version__}")
     return 0
 
 
@@ -251,7 +251,7 @@ def cmd_version(_args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="tripwire",
+        prog="leakproof",
         description="Local-first leak firewall — see and redact exactly what your "
                     "AI tools send to the cloud. Nothing leaves the building.",
     )
@@ -314,7 +314,7 @@ def main(argv: list[str] | None = None) -> int:
     # the scanner reads BEFORE any lane imports/scans, so scan/run/proxy all inherit
     # it (the proxy starts in-process, so it inherits too). Hook is invoked by git
     # outside this process — scanner's own default must also be off (flagged to scanner owner).
-    os.environ["TRIPWIRE_SEMANTIC"] = "1" if getattr(args, "semantic", False) else "0"
+    os.environ["LEAKPROOF_SEMANTIC"] = "1" if getattr(args, "semantic", False) else "0"
     if getattr(args, "version", False):
         return cmd_version(args)
     if not getattr(args, "command", None):

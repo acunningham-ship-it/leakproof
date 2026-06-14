@@ -1,7 +1,7 @@
-"""tripwire L4 — tool adapters.
+"""leakproof L4 — tool adapters.
 
-`tripwire run -- <tool> [args...]` launches an AI coding tool with its API
-traffic pointed at the local tripwire proxy, so every outbound request passes
+`leakproof run -- <tool> [args...]` launches an AI coding tool with its API
+traffic pointed at the local leakproof proxy, so every outbound request passes
 through the secret/PII scanner before it can leave the machine.
 
 The interception trick is the same one leanroom used in front of Claude Code:
@@ -62,7 +62,7 @@ _RECIPES: dict[str, Recipe] = {
     },
 }
 
-# Aliases so `tripwire run -- claude-code ...` and `tripwire run -- claude ...`
+# Aliases so `leakproof run -- claude-code ...` and `leakproof run -- claude ...`
 # resolve to the same recipe.
 _ALIASES: dict[str, str] = {
     "claude-code": "claude",
@@ -117,20 +117,20 @@ def build_env(tool: str, proxy_url: str, base_env: dict | None = None) -> dict:
     env = dict(os.environ if base_env is None else base_env)
     for key, template in recipe_for(tool).items():
         env[key] = template.replace("{proxy}", proxy_url)
-    # Marker so the proxy/child can tell it's running under tripwire (handy for
+    # Marker so the proxy/child can tell it's running under leakproof (handy for
     # the TUI and for avoiding accidental recursion).
-    env["TRIPWIRE_ACTIVE"] = "1"
+    env["LEAKPROOF_ACTIVE"] = "1"
     return env
 
 
 def resolve_tool(argv: list[str]) -> tuple[str, list[str]]:
     """Split `run` argv into (tool_key, command).
 
-    argv is everything after `tripwire run --`, e.g. ["aider", "--model", "x"].
+    argv is everything after `leakproof run --`, e.g. ["aider", "--model", "x"].
     Returns the canonical tool key and the command list to exec (unchanged argv).
     """
     if not argv:
-        raise ValueError("no tool given: usage `tripwire run -- <tool> [args...]`")
+        raise ValueError("no tool given: usage `leakproof run -- <tool> [args...]`")
     return _canonical(argv[0]), list(argv)
 
 

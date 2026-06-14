@@ -27,7 +27,7 @@ import sys
 import time
 from collections import Counter
 
-from tripwire import audit
+from leakproof import audit
 
 
 # --- ANSI ----------------------------------------------------------------------
@@ -220,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.demo:
         try:
-            from tripwire import audit_demo
+            from leakproof import audit_demo
             audit_demo.main([])          # seeds the default-path demo log
         except Exception as exc:          # demo is best-effort; render whatever exists
             sys.stderr.write(f"(demo-log generator unavailable: {exc})\n")

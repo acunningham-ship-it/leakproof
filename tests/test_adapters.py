@@ -1,9 +1,9 @@
-"""Tests for tripwire.adapters (L4) — stdlib unittest, no deps, no network."""
+"""Tests for leakproof.adapters (L4) — stdlib unittest, no deps, no network."""
 
 import os
 import unittest
 
-from tripwire import adapters
+from leakproof import adapters
 
 
 PROXY = "http://127.0.0.1:8747"  # locked L1 proxy port (opus-5 #369)
@@ -13,7 +13,7 @@ class TestRecipes(unittest.TestCase):
     def test_claude_recipe_sets_anthropic_base_url(self):
         env = adapters.build_env("claude", PROXY, base_env={})
         self.assertEqual(env["ANTHROPIC_BASE_URL"], PROXY + "/anthropic")
-        self.assertEqual(env["TRIPWIRE_ACTIVE"], "1")
+        self.assertEqual(env["LEAKPROOF_ACTIVE"], "1")
 
     def test_claude_code_alias_resolves_to_claude(self):
         self.assertTrue(adapters.is_supported("claude-code"))
@@ -22,7 +22,7 @@ class TestRecipes(unittest.TestCase):
         )
 
     def test_path_prefixed_tool_name_resolves(self):
-        # `tripwire run -- /usr/local/bin/claude` should still match.
+        # `leakproof run -- /usr/local/bin/claude` should still match.
         env = adapters.build_env("/usr/local/bin/claude", PROXY, base_env={})
         self.assertEqual(env["ANTHROPIC_BASE_URL"], PROXY + "/anthropic")
 
@@ -51,12 +51,12 @@ class TestBuildEnv(unittest.TestCase):
         self.assertEqual(env["FOO"], "bar")
 
     def test_defaults_to_os_environ(self):
-        os.environ["TRIPWIRE_TEST_SENTINEL"] = "yes"
+        os.environ["LEAKPROOF_TEST_SENTINEL"] = "yes"
         try:
             env = adapters.build_env("claude", PROXY)
-            self.assertEqual(env["TRIPWIRE_TEST_SENTINEL"], "yes")
+            self.assertEqual(env["LEAKPROOF_TEST_SENTINEL"], "yes")
         finally:
-            del os.environ["TRIPWIRE_TEST_SENTINEL"]
+            del os.environ["LEAKPROOF_TEST_SENTINEL"]
 
     def test_rejects_non_http_proxy_url(self):
         with self.assertRaises(ValueError):
@@ -94,7 +94,7 @@ class TestRun(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             adapters.run(
                 "claude",
-                ["tripwire-no-such-binary-xyz"],
+                ["leakproof-no-such-binary-xyz"],
                 PROXY,
                 base_env={},
                 _spawn=lambda a, e: 0,

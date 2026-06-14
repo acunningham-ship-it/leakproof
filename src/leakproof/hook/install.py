@@ -1,7 +1,7 @@
 """leakproof pre-commit hook installer.
 
 install() drops a pre-commit hook into the repo's git hooks dir that scans the
-staged diff via `python -m tripwire.hook`. Self-contained (no dependence on the
+staged diff via `python -m leakproof.hook`. Self-contained (no dependence on the
 `leakproof` console script being on PATH). Backs up any existing hook so we never
 silently clobber the user's setup; uninstall() restores it. Worktree-safe
 (resolves the real hooks path via `git rev-parse --git-path hooks`).
@@ -20,9 +20,9 @@ HOOK_TEMPLATE = """#!/bin/sh
 exec {command}
 """
 # Captured at install time, in the user's environment → robust across the
-# tripwire→leakproof rename and across machines. `leakproof precommit` is a nicer
+# leakproof→leakproof rename and across machines. `leakproof precommit` is a nicer
 # published alias once cli wires it (worker-claude), but this always works.
-DEFAULT_COMMAND = f"{sys.executable} -m tripwire.hook"
+DEFAULT_COMMAND = f"{sys.executable} -m leakproof.hook"
 BACKUP_SUFFIX = ".leakproof-backup"
 
 

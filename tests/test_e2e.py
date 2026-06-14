@@ -7,7 +7,7 @@ This is the "does the whole product actually work" gate behind the Show HN demo.
 Assembled from the canonical package-per-lane lanes exactly as worker-opus-2's
 integration plan (#407) sequences master: proxy/ + scanner/ + audit + adapters.
 
-Hermetic: TRIPWIRE_SEMANTIC=0 pins it to the deterministic rules layer so it passes
+Hermetic: LEAKPROOF_SEMANTIC=0 pins it to the deterministic rules layer so it passes
 in CI with no ollama. The rules layer catches every secret planted here.
 """
 from __future__ import annotations
@@ -17,8 +17,8 @@ import os
 import pytest
 from aiohttp import ClientSession, web
 
-from tripwire import adapters, audit
-from tripwire.proxy import Proxy
+from leakproof import adapters, audit
+from leakproof.proxy import Proxy
 
 # real secret shapes the rules layer flags (NOT the AWS doc-example, which is a decoy)
 OPENAI_KEY = "sk-proj-aZ12bY34cX56dW78eV90fU12gT34hS56iR78jQ90kP12lO34"
@@ -27,7 +27,7 @@ PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890\n----
 
 @pytest.fixture(autouse=True)
 def _deterministic_scanner(monkeypatch):
-    monkeypatch.setenv("TRIPWIRE_SEMANTIC", "0")  # rules-only → hermetic, no ollama
+    monkeypatch.setenv("LEAKPROOF_SEMANTIC", "0")  # rules-only → hermetic, no ollama
 
 
 class _Echo:
@@ -58,7 +58,7 @@ class _Echo:
 
 async def _real_proxy(echo_base, mode, audit_log):
     # NO scanner/redactor/on_event injected → exercises the REAL default wiring:
-    # tripwire.scanner.scan/redact + tripwire.audit.record.
+    # leakproof.scanner.scan/redact + leakproof.audit.record.
     os.environ["LEAKPROOF_AUDIT_LOG"] = str(audit_log)
     p = Proxy(port=0, mode=mode, upstreams={"anthropic": echo_base}, tool="claude-code")
     await p.start()

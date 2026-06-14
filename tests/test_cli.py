@@ -1,4 +1,4 @@
-"""Tests for the tripwire CLI lane (owner: worker-claude).
+"""Tests for the leakproof CLI lane (owner: worker-claude).
 
 Covers dispatch, exit codes, graceful degradation when a lane isn't implemented,
 and the scan path against scanner.scan() / scanner.redact() (the locked seam).
@@ -12,7 +12,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tripwire import cli  # noqa: E402
+from leakproof import cli  # noqa: E402
 
 # Findings are plain dicts per worker-2's locked scanner contract.
 def _finding(**kw):
@@ -27,7 +27,7 @@ def test_help_flag_exits_zero(capsys):
     with pytest.raises(SystemExit) as exc:
         cli.main(["-h"])
     assert exc.value.code == 0
-    assert "tripwire" in capsys.readouterr().out.lower()
+    assert "leakproof" in capsys.readouterr().out.lower()
 
 
 def test_no_args_prints_help():
@@ -63,7 +63,7 @@ def test_scan_reports_leak(tmp_path, monkeypatch):
         return [_finding(type="aws_access_key", span=[11, 31], severity="critical",
                          reason="looks like an AWS access key", redaction="AWS_KEY_***")]
 
-    monkeypatch.setattr("tripwire.scanner.scan", fake_scan)
+    monkeypatch.setattr("leakproof.scanner.scan", fake_scan)
     assert cli.main(["scan", str(f)]) == 2
 
 
@@ -71,7 +71,7 @@ def test_scan_low_severity_under_threshold_exits_zero(tmp_path, monkeypatch):
     """A low-sev finding (e.g. vendor_test_key) lists but does NOT fail by default."""
     f = tmp_path / "t.py"
     f.write_text("STRIPE=sk_test_abc\n")
-    monkeypatch.setattr("tripwire.scanner.scan",
+    monkeypatch.setattr("leakproof.scanner.scan",
                         lambda text, context=None: [_finding(type="vendor_test_key", severity="low")])
     assert cli.main(["scan", str(f)]) == 0           # default --fail-on medium
     assert cli.main(["scan", "--fail-on", "low", str(f)]) == 2  # opt-in stricter
@@ -100,9 +100,9 @@ def test_demo_log_calls_generator(monkeypatch):
         return 0
 
     import types as _t
-    mod = _t.ModuleType("tripwire.audit_demo")
+    mod = _t.ModuleType("leakproof.audit_demo")
     mod.main = fake_main
-    monkeypatch.setitem(sys.modules, "tripwire.audit_demo", mod)
+    monkeypatch.setitem(sys.modules, "leakproof.audit_demo", mod)
     assert cli.main(["demo-log"]) == 0
     assert calls.get("ran") is True
 
@@ -110,9 +110,9 @@ def test_demo_log_calls_generator(monkeypatch):
 def test_semantic_off_by_default():
     import os
     cli.main(["version"])
-    assert os.environ.get("TRIPWIRE_SEMANTIC") == "0"   # rules-only default
+    assert os.environ.get("LEAKPROOF_SEMANTIC") == "0"   # rules-only default
     cli.main(["--semantic", "version"])
-    assert os.environ.get("TRIPWIRE_SEMANTIC") == "1"   # opt-in
+    assert os.environ.get("LEAKPROOF_SEMANTIC") == "1"   # opt-in
 
 
 def test_print_findings_empty(capsys):

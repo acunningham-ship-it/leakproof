@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Standalone adversarial scorecard for tripwire's scanner (QA lane / worker-3).
+"""Standalone adversarial scorecard for leakproof's scanner (QA lane / worker-3).
 
 Runs the leak/decoy corpus through the real scanner and prints a scorecard. Use it as the
 human-facing report AND a CI gate (exits non-zero on any false-pass / false-positive).
@@ -23,7 +23,7 @@ from harness import format_report, run  # noqa: E402
 def _load_scan():
     """Import the scanner's scan(). Returns None if the lane isn't merged yet."""
     try:
-        from tripwire.scanner import scan  # type: ignore
+        from leakproof.scanner import scan  # type: ignore
         return scan
     except Exception:
         return None
@@ -32,7 +32,7 @@ def _load_scan():
 def main() -> int:
     scan = _load_scan()
     if scan is None:
-        print("tripwire.scanner.scan() not available yet — scanner lane not merged.")
+        print("leakproof.scanner.scan() not available yet — scanner lane not merged.")
         print("(corpus + harness are ready; this becomes a hard gate once scan() lands.)")
         return 0
 

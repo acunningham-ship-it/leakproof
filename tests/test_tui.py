@@ -1,4 +1,4 @@
-"""Tests for tripwire.tui dashboard rendering. stdlib unittest, no deps.
+"""Tests for leakproof.tui dashboard rendering. stdlib unittest, no deps.
 
 Builds events with the real audit module types so the render stays honest to
 the locked AuditEvent/Finding/Totals contract worker-opus-1 owns.
@@ -11,8 +11,8 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from tripwire import audit                       # noqa: E402
-from tripwire.tui import dashboard, render_frame  # noqa: E402
+from leakproof import audit                       # noqa: E402
+from leakproof.tui import dashboard, render_frame  # noqa: E402
 
 dashboard._NOCOLOR = True                         # deterministic text for assertions
 

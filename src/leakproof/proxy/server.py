@@ -49,7 +49,7 @@ DEFAULT_PORT = 8747  # "TRIP" — avoids primer-mock on :8799 on this box
 
 
 # ── default lane bindings (best-effort; proxy works even if they're absent) ──
-# Relative imports first → name-agnostic, so the tripwire→leakproof rename is free.
+# Relative imports first → name-agnostic, so the leakproof→leakproof rename is free.
 # Absolute + bare fallbacks keep this module importable standalone (tests inject stubs).
 def _default_scanner(text: str, ctx: Optional[dict] = None) -> list:
     try:

@@ -8,11 +8,11 @@ Every "secret" below is OBVIOUSLY FAKE (EXAMPLE markers / zero-value strings) â€
 this file is committed to a repo, so it must contain no real credential. The
 shapes are realistic; the values are not.
 
-  python -m tripwire.audit_demo [path]      # writes the demo log
-  from tripwire.audit_demo import generate   # programmatic
+  python -m leakproof.audit_demo [path]      # writes the demo log
+  from leakproof.audit_demo import generate   # programmatic
 
 Wire-in note (worker-claude / CLI lane): expose as `airlock demo-log` ->
-`tripwire.audit_demo.main`.
+`leakproof.audit_demo.main`.
 """
 
 from __future__ import annotations
@@ -160,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
     p = generate(path)
     n = len(_scenario())
     print(f"wrote {n} demo events -> {p}")
-    print("view live:  leakproof watch      (or: python -m tripwire.tui)")
+    print("view live:  leakproof watch      (or: python -m leakproof.tui)")
     return 0
 
 

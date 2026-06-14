@@ -1,9 +1,9 @@
-"""tripwire.hook lane — block secrets/PII before they hit git (leakproof Surface B).
+"""leakproof.hook lane — block secrets/PII before they hit git (leakproof Surface B).
 
 CLI entry points (worker-claude's contract #386, return process exit codes):
   install(repo=".") -> int          # `leakproof install-hook`
   uninstall(repo=".") -> int        # `leakproof uninstall-hook`
-  run(repo=".") -> int              # the installed git hook runs `python -m tripwire.hook`
+  run(repo=".") -> int              # the installed git hook runs `python -m leakproof.hook`
 
 Rich/underlying API:
   install_hook(repo, command, force) -> hook_path

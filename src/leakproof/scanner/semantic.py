@@ -28,7 +28,7 @@ from typing import Callable
 
 # Bound what we send to the model so a giant blob can't hang the commit/proxy.
 _MAX_CHARS = 8000
-_TIMEOUT_S = float(os.environ.get("TRIPWIRE_SEMANTIC_TIMEOUT", "12"))
+_TIMEOUT_S = float(os.environ.get("LEAKPROOF_SEMANTIC_TIMEOUT", "12"))
 
 _PROMPT = """\
 You are a secret/PII leak detector. You are given a chunk of text from a developer's \
@@ -63,8 +63,8 @@ _VALID_SEVERITY = {"critical", "high", "medium", "low"}
 
 def _ollama_call(prompt: str) -> str:
     """Default model transport: ollama /api/generate. Returns raw completion text."""
-    base = os.environ.get("TRIPWIRE_OLLAMA_URL", "http://localhost:11434").rstrip("/")
-    model = os.environ.get("TRIPWIRE_SEMANTIC_MODEL", "qwen2.5:1.5b")
+    base = os.environ.get("LEAKPROOF_OLLAMA_URL", "http://localhost:11434").rstrip("/")
+    model = os.environ.get("LEAKPROOF_SEMANTIC_MODEL", "qwen2.5:1.5b")
     payload = json.dumps({
         "model": model,
         "prompt": prompt,
@@ -83,7 +83,7 @@ def _ollama_call(prompt: str) -> str:
 
 def semantic_enabled() -> bool:
     """Off only if explicitly disabled. Default on (best-effort)."""
-    return os.environ.get("TRIPWIRE_SEMANTIC", "0").strip().lower() not in ("0", "false", "no")
+    return os.environ.get("LEAKPROOF_SEMANTIC", "0").strip().lower() not in ("0", "false", "no")
 
 
 def _parse_model_json(raw: str) -> list[dict]:

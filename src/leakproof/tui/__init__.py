@@ -3,7 +3,7 @@
 Public API the CLI dispatches to:
     watch(audit_path=None) -> int     # live tail + repaint
     render_frame(events) -> str       # pure render (testable, screenshots)
-    main(argv=None) -> int            # standalone `python -m tripwire.tui`
+    main(argv=None) -> int            # standalone `python -m leakproof.tui`
 """
 
 from .dashboard import main, render_frame, watch

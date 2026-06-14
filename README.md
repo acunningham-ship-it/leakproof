@@ -1,4 +1,4 @@
-<!-- NAME PENDING FINAL LOCK: front-runner `leakproof` (free on npm+pypi+leakproof.sh; airlock & tripwire both collide). Alt: `noexfil`. On-disk package still `tripwire` until the rename sweep. DRAFT — every claim below gets checked against the real build before anything ships public. -->
+<!-- NAME PENDING FINAL LOCK: front-runner `leakproof` (free on npm+pypi+leakproof.sh; airlock & leakproof both collide). Alt: `noexfil`. On-disk package still `leakproof` until the rename sweep. DRAFT — every claim below gets checked against the real build before anything ships public. -->
 
 # leakproof
 

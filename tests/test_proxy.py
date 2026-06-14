@@ -14,7 +14,7 @@ import json
 import pytest
 from aiohttp import ClientSession, web
 
-from tripwire.proxy import Proxy, start_background
+from leakproof.proxy import Proxy, start_background
 
 SECRET = "SECRET123"
 REDACTION = "‹redacted›"

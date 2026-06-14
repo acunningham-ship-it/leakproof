@@ -1,4 +1,4 @@
-"""Tests for the scan-core (tripwire.scanner): rules fast-path, semantic pass, redact.
+"""Tests for the scan-core (leakproof.scanner): rules fast-path, semantic pass, redact.
 
 The semantic model call is INJECTED so these run with no ollama/network. A separate
 adversarial corpus (worker-3's lane) exercises breadth; this file pins the contract.
@@ -6,8 +6,8 @@ adversarial corpus (worker-3's lane) exercises breadth; this file pins the contr
 
 import pytest
 
-from tripwire import scanner
-from tripwire.scanner import rules, semantic
+from leakproof import scanner
+from leakproof.scanner import rules, semantic
 
 
 @pytest.fixture(autouse=True)
@@ -17,12 +17,12 @@ def _hermetic_semantic(monkeypatch):
     `scan()` is then deterministic (regex/entropy only). Semantic behaviour is covered
     explicitly via injected `call_model` in the tests that opt back in.
     """
-    monkeypatch.setenv("TRIPWIRE_SEMANTIC", "0")
+    monkeypatch.setenv("LEAKPROOF_SEMANTIC", "0")
 
 
 @pytest.fixture
 def semantic_on(monkeypatch):
-    monkeypatch.setenv("TRIPWIRE_SEMANTIC", "1")
+    monkeypatch.setenv("LEAKPROOF_SEMANTIC", "1")
 
 
 # --- real secrets the regex fast-path must catch ------------------------------------
@@ -202,7 +202,7 @@ def test_semantic_model_exception_degrades_to_empty(semantic_on):
 
 
 def test_semantic_disabled_via_env(monkeypatch):
-    monkeypatch.setenv("TRIPWIRE_SEMANTIC", "0")
+    monkeypatch.setenv("LEAKPROOF_SEMANTIC", "0")
     called = []
     semantic.scan_semantic("x", call_model=lambda p: called.append(p) or "[]")
     assert called == []  # transport never invoked when disabled

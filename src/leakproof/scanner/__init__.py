@@ -1,4 +1,4 @@
-"""tripwire.scanner — the local secret/PII/leak scan-core.
+"""leakproof.scanner — the local secret/PII/leak scan-core.
 
 THE locked contract every surface (egress proxy, git hook, QA corpus) builds against:
 

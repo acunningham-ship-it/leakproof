@@ -1,4 +1,4 @@
-"""Tests for the tripwire.hook surface (leakproof Surface B). Uses a FAKE scanner
+"""Tests for the leakproof.hook surface (leakproof Surface B). Uses a FAKE scanner
 matching worker-2's locked contract (#370) so this lane tests standalone."""
 import os
 import re
@@ -8,11 +8,11 @@ import tempfile
 import textwrap
 import unittest
 
-# src-layout: make `tripwire` importable without an install/build
+# src-layout: make `leakproof` importable without an install/build
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
-from tripwire import hook
-from tripwire.hook import core
+from leakproof import hook
+from leakproof.hook import core
 
 AWS = re.compile(r"AKIA[0-9A-Z]{16}")
 
@@ -137,9 +137,9 @@ class TestInstall(unittest.TestCase):
         self.assertEqual(hook.install(self.dir), 0)
 
     def test_install_creates_executable_hook(self):
-        path = hook.install_hook(self.dir, command="python -m tripwire.hook")
+        path = hook.install_hook(self.dir, command="python -m leakproof.hook")
         self.assertTrue(os.access(path, os.X_OK))
-        self.assertIn("tripwire.hook", self._read(path))
+        self.assertIn("leakproof.hook", self._read(path))
 
     def test_install_backs_up_existing(self):
         hooks = os.path.join(self.dir, ".git", "hooks")
@@ -192,8 +192,8 @@ class TestRealGitCommit(unittest.TestCase):
             fh.write(textwrap.dedent(f"""
                 import re, sys
                 sys.path.insert(0, {src!r})
-                from tripwire import hook
-                from tripwire.hook import core
+                from leakproof import hook
+                from leakproof.hook import core
                 AWS = re.compile(r'AKIA[0-9A-Z]{{16}}')
                 def scan(t, ctx=None):
                     return [{{'type':'aws_secret_key','span':[m.start(),m.end()],

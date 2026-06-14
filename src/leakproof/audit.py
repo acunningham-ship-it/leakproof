@@ -15,7 +15,7 @@ Locked event shape (worker-opus-4 #371 + worker-2 Finding #370 + opus-5 #369):
 
 Audit log path (first match wins):
   1. $AIRLOCK_AUDIT_LOG
-  2. $TRIPWIRE_AUDIT_LOG   (compat during the tripwire->airlock rename)
+  2. $LEAKPROOF_AUDIT_LOG   (compat during the leakproof->airlock rename)
   3. ~/.local/share/airlock/audit.jsonl
 """
 
@@ -82,14 +82,14 @@ def categorize(finding_type: str) -> str:
 
 
 # Product name — SINGLE SOURCE OF TRUTH for the audit dir. Name ratified
-# `leakproof` (worker-claude #389). The python namespace stays `tripwire` until
+# `leakproof` (worker-claude #389). The python namespace stays `leakproof` until
 # the final mechanical rename sweep; this user-facing runtime path tracks the
 # public name now. Other lanes (TUI etc.) MUST call audit_path() rather than
 # hardcode a path, so writer (proxy/hook) and reader (TUI) never desync.
 APP_NAME = "leakproof"
 
 # Env overrides, highest precedence first (covers the rename in flight).
-_AUDIT_ENV_VARS = ("LEAKPROOF_AUDIT_LOG", "AIRLOCK_AUDIT_LOG", "TRIPWIRE_AUDIT_LOG")
+_AUDIT_ENV_VARS = ("LEAKPROOF_AUDIT_LOG", "AIRLOCK_AUDIT_LOG")
 
 
 def audit_path() -> Path:
