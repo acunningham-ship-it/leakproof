@@ -107,6 +107,14 @@ def test_demo_log_calls_generator(monkeypatch):
     assert calls.get("ran") is True
 
 
+def test_semantic_off_by_default():
+    import os
+    cli.main(["version"])
+    assert os.environ.get("TRIPWIRE_SEMANTIC") == "0"   # rules-only default
+    cli.main(["--semantic", "version"])
+    assert os.environ.get("TRIPWIRE_SEMANTIC") == "1"   # opt-in
+
+
 def test_print_findings_empty(capsys):
     cli.print_findings([])
     assert "no leaks" in capsys.readouterr().out.lower()

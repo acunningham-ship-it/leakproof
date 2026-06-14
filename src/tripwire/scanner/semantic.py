@@ -83,7 +83,7 @@ def _ollama_call(prompt: str) -> str:
 
 def semantic_enabled() -> bool:
     """Off only if explicitly disabled. Default on (best-effort)."""
-    return os.environ.get("TRIPWIRE_SEMANTIC", "1").strip().lower() not in ("0", "false", "no")
+    return os.environ.get("TRIPWIRE_SEMANTIC", "0").strip().lower() not in ("0", "false", "no")
 
 
 def _parse_model_json(raw: str) -> list[dict]:

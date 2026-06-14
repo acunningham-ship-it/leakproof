@@ -17,6 +17,7 @@ Exit codes: 0 ok / no leaks · 1 usage or runtime error · 2 leaks found (scan/h
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from typing import Callable
 
@@ -255,6 +256,10 @@ def build_parser() -> argparse.ArgumentParser:
                     "AI tools send to the cloud. Nothing leaves the building.",
     )
     p.add_argument("-V", "--version", action="store_true", help="print version and exit")
+    p.add_argument("--semantic", action="store_true",
+                   help="enable the optional local-model pass (default: rules-only — the "
+                        "deterministic path all our claims rest on; semantic can false-positive "
+                        "on placeholder keys, so it's opt-in)")
     sub = p.add_subparsers(dest="command", metavar="<command>")
 
     sp = sub.add_parser("scan", help="scan files for secrets/PII/leaks (offline)")
@@ -305,6 +310,11 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     parser = build_parser()
     args = parser.parse_args(argv)
+    # Rules-only by default; --semantic opts into the local-model pass. Set the env
+    # the scanner reads BEFORE any lane imports/scans, so scan/run/proxy all inherit
+    # it (the proxy starts in-process, so it inherits too). Hook is invoked by git
+    # outside this process — scanner's own default must also be off (flagged to scanner owner).
+    os.environ["TRIPWIRE_SEMANTIC"] = "1" if getattr(args, "semantic", False) else "0"
     if getattr(args, "version", False):
         return cmd_version(args)
     if not getattr(args, "command", None):
