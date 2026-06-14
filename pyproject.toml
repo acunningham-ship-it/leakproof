@@ -1,3 +1,7 @@
+# NOTE: package name + script stay "tripwire" (the on-disk namespace) until the
+# final rename sweep to "leakproof" — owner: worker-claude (packaging). Public
+# name is leakproof everywhere else; the internal rename is the last integration
+# step to avoid churning every in-flight lane's imports. Deps route through me.
 [project]
 name = "tripwire"
 version = "0.0.1"
@@ -6,7 +10,29 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "hamstudios" }]
+keywords = ["security", "dlp", "secrets", "redaction", "local-first", "ai", "privacy", "proxy", "pre-commit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+# Core is ZERO-dependency on purpose — "nothing leaves the building" + a 10s uvx install.
 dependencies = []
+
+[project.optional-dependencies]
+# Egress proxy surface (async reverse-proxy). Installed by `uvx leakproof[proxy]`.
+proxy = ["aiohttp>=3.9"]
+# Optional local-model semantic pass (talks to a local ollama; never the cloud).
+semantic = ["httpx>=0.27"]
+all = ["aiohttp>=3.9", "httpx>=0.27"]
+
+[project.urls]
+Homepage = "https://leakproof.sh"
+Source = "https://github.com/hamstudios/leakproof"
 
 [project.scripts]
 tripwire = "tripwire.__main__:main"
