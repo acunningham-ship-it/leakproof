@@ -1,0 +1,29 @@
+# billing-service — someone left live credentials in two files.
+$ grep -n 'AKIA\|postgres\|_fallback' -r services tests
+services/billing/config.py:6:    _aws = "AKIA2E0A8F3B9C1D7K4P"
+services/billing/config.py:9:    _fallback = "QUtJQTJFMEE4RjNCOUMxRDdLNFA="
+tests/fixtures/conftest.py:3:DB = "postgres://svc_app:Pr0dPassw0rd!@db.prod.internal:5432/payments"
+
+# gitleaks — the standard regex/keyword secret scanner:
+$ gitleaks detect --no-git --source .
+2:10PM INF no leaks found
+  => 0 findings. The secrets sit in fields named _aws / _fallback / DB —
+     keyword scanners decide by the NAME, and these don't look secret.
+
+# leakproof — rules-only, no model, nothing leaves the machine:
+$ leakproof scan services/billing/config.py tests/fixtures/conftest.py
+
+services/billing/config.py
+⚠ 2 potential leak(s) in services/billing/config.py
+  HIGH     aws_access_key_id @144:164  AWS access key ID
+           ‹aws_access_key_id redacted›  [rules]
+  MEDIUM   high_entropy_string @299:327  High-entropy string (entropy=4.2 bits/char) — possible credential
+           ‹high_entropy_string redacted›  [rules]
+
+tests/fixtures/conftest.py
+⚠ 1 potential leak(s) in tests/fixtures/conftest.py
+  HIGH     db_url_with_credentials @21:75  Database URL with embedded username:password
+           ‹db_url_with_credentials redacted›  [rules]
+
+# Same files.  gitleaks: 0.   leakproof: 3.
+# leakproof reads the VALUE, not the variable name. Local. Deterministic.

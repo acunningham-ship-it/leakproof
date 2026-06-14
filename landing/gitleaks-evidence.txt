@@ -29,7 +29,7 @@ RuleID:      generic-api-key
 ##   tests/fixtures/conftest.py
 ##     [high]   db_url_with_credentials   prod Postgres DSN with embedded creds
 ##   => leakproof: 3 caught (rules-only).  gitleaks: 0.
-## Repro: LEAKPROOF_SEMANTIC=0 PYTHONPATH=~/projects/tripwire-semantic/src python3 /tmp/lp_scan.py
+## Repro: LEAKPROOF_SEMANTIC=0 leakproof scan <fixture files>  (installed console script; rules-only by default)
 ## (optional semantic pass via ollama qwen2.5:1.5b also catches the "EXAMPLE"-masked AWS secret,
 ##  but it's non-deterministic on a 1.5B model — rules-only is the clean demo number.)
 ##
