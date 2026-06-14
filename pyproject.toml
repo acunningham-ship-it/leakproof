@@ -1,0 +1,19 @@
+[project]
+name = "tripwire"
+version = "0.0.1"
+description = "Local-first leak firewall for developers — see and redact exactly what your AI tools send to the cloud."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "hamstudios" }]
+dependencies = []
+
+[project.scripts]
+tripwire = "tripwire.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tripwire"]
