@@ -95,8 +95,9 @@ def test_demo_log_graceful_when_absent():
 def test_demo_log_calls_generator(monkeypatch):
     calls = {}
 
-    def fake_main():
-        calls["ran"] = True
+    def fake_main(argv=None):
+        # cli passes [] so audit_demo never grabs sys.argv (opus-5's bug fix)
+        calls["argv"] = argv
         return 0
 
     import types as _t
@@ -104,7 +105,7 @@ def test_demo_log_calls_generator(monkeypatch):
     mod.main = fake_main
     monkeypatch.setitem(sys.modules, "leakproof.audit_demo", mod)
     assert cli.main(["demo-log"]) == 0
-    assert calls.get("ran") is True
+    assert calls.get("argv") == []
 
 
 def test_semantic_off_by_default():

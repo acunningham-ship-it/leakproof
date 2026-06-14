@@ -238,7 +238,10 @@ def cmd_demo_log(_args: argparse.Namespace) -> int:
     gen = _lane("audit_demo", "main", "worker-opus-1")
     if gen is None:
         return 1
-    return int(gen() or 0)
+    # Pass [] explicitly: audit_demo.main(argv=None) falls back to sys.argv and would
+    # treat our subcommand args as an output path (writing to a file named e.g. "-q"
+    # under pytest). [] -> argv=[] -> default audit_path(). (caught by opus-5's smoke)
+    return int(gen([]) or 0)
 
 
 def cmd_version(_args: argparse.Namespace) -> int:
