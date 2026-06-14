@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- ============================================================
+     REPOINT IN 30 SECONDS — all copy lives in the markup below,
+     names use the token "leakproof" (find/replace to rename).
+     Hero + the 3 cards are the only blocks to touch to repivot.
+     ============================================================ -->
+<title>leakproof — see what your AI coding tools send to the cloud</title>
+<meta name="description" content="A one-command local proxy that shows exactly what Claude Code, Cursor, Copilot and aider ship to the cloud — secrets, .env values, whole files — and redacts it before it leaves. Local-first DLP for developers." />
+<style>
+  :root {
+    --bg: #0a0c10;
+    --panel: #11151c;
+    --border: #1e2530;
+    --fg: #e6edf3;
+    --muted: #8b949e;
+    --accent: #f85149;      /* leakproof red */
+    --accent-2: #58a6ff;    /* link blue */
+    --ok: #3fb950;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; max-width: 920px; margin: 0 auto;
+  }
+  .brand { font-family: var(--mono); font-weight: 600; font-size: 18px; }
+  .brand .dot { color: var(--accent); }
+  .nav-links a { color: var(--muted); margin-left: 22px; font-size: 14px; }
+
+  header { padding: 64px 0 48px; text-align: center; }
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: 13px;
+    color: var(--accent); border: 1px solid var(--border);
+    border-radius: 999px; padding: 5px 14px; margin-bottom: 28px;
+    background: var(--panel);
+  }
+  h1 { font-size: 52px; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 20px; }
+  h1 .grad { background: linear-gradient(90deg,var(--accent),#f0b72f); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .sub { font-size: 20px; color: var(--muted); max-width: 640px; margin: 0 auto 36px; }
+  .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--mono); font-size: 15px; font-weight: 600;
+    padding: 13px 24px; border-radius: 8px; border: 1px solid var(--border);
+    cursor: pointer; transition: transform .08s ease, border-color .2s ease;
+  }
+  .btn:hover { transform: translateY(-1px); text-decoration: none; }
+  .btn-primary { background: var(--accent); color: #2a0606; border-color: var(--accent); }
+  .btn-ghost { background: var(--panel); color: var(--fg); }
+
+  .term {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; margin: 48px auto 0; text-align: left;
+    font-family: var(--mono); font-size: 14px; overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.6);
+  }
+  .term-bar { display: flex; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .term-bar span { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .term-body { padding: 22px; white-space: pre-wrap; line-height: 1.7; }
+  .term-body .prompt { color: var(--ok); }
+  .term-body .cmd { color: var(--fg); }
+  .term-body .out { color: var(--muted); }
+  .term-body .flag { color: var(--accent); }
+  .term-body .ok { color: var(--ok); }
+  .term-body .hl { color: #f0b72f; }
+
+  section { padding: 56px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 30px; letter-spacing: -0.5px; margin-bottom: 12px; text-align: center; }
+  .lead { color: var(--muted); text-align: center; max-width: 620px; margin: 0 auto 40px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .card h3 { font-size: 17px; margin-bottom: 8px; font-family: var(--mono); }
+  .card p { color: var(--muted); font-size: 15px; }
+  .card .ic { font-size: 22px; margin-bottom: 12px; }
+
+  .install { text-align: center; }
+  .install code {
+    display: inline-block; font-family: var(--mono); font-size: 16px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 24px; color: var(--ok); margin-top: 8px;
+  }
+
+  .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 18px; }
+  .tier { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 28px; }
+  .tier.feat { border-color: var(--accent); }
+  .tier h3 { font-family: var(--mono); font-size: 18px; margin-bottom: 4px; }
+  .tier .price { font-size: 30px; font-weight: 700; margin: 8px 0 16px; }
+  .tier ul { list-style: none; }
+  .tier li { color: var(--muted); font-size: 14.5px; padding: 5px 0 5px 22px; position: relative; }
+  .tier li::before { content: "→"; position: absolute; left: 0; color: var(--ok); }
+
+  footer { padding: 40px 0 60px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); }
+  footer .brand { font-size: 15px; }
+
+  @media (max-width: 600px) { h1 { font-size: 34px; } .sub { font-size: 17px; } .term { font-size: 12.5px; } }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="brand">leakproof<span class="dot">.</span></div>
+    <div class="nav-links">
+      <a href="#demo">Demo</a>
+      <a href="#how">How</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://github.com/hamstudios" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="wrap">
+    <span class="tag">local-first DLP for developers · one command · open source</span>
+    <h1>Your AI coding tool sends<br /><span class="grad">more than you think.</span></h1>
+    <p class="sub">
+      <strong>leakproof</strong> reads every request your AI editor makes and redacts secrets
+      before they leave your machine. Local, because a scanner that has to receive your
+      secret to scan it isn't one.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#install">Get started</a>
+      <a class="btn btn-ghost" href="https://news.ycombinator.com" target="_blank" rel="noopener">Discuss on HN ↗</a>
+    </div>
+
+    <div class="term" id="demo">
+      <div class="term-bar">
+        <span style="background:#f85149"></span>
+        <span style="background:#f0b72f"></span>
+        <span style="background:#3fb950"></span>
+      </div>
+      <div class="term-body"><span class="prompt">$</span> <span class="cmd">leakproof run -- claude</span>
+<span class="out">▶ proxy live on 127.0.0.1:8747 · routing Claude Code through leakproof</span>
+
+<span class="hl">┌─ OUTBOUND  api.anthropic.com  POST /v1/messages ──────────────┐</span>
+<span class="flag">  ⚠ services/billing/config.py   aws_access_key_id  [high]     → REDACTED</span>
+<span class="flag">  ⚠ services/billing/config.py   high_entropy_string [med]     → REDACTED</span>
+<span class="out">                                 (a base64-wrapped key, flagged on entropy)</span>
+<span class="flag">  ⚠ tests/fixtures/conftest.py   db_url_with_credentials [high] → REDACTED</span>
+<span class="out">  · src/ui/Button.tsx            (no secrets)                   passed</span>
+<span class="hl">└───────────────────────────────────────────────────────────────┘</span>
+
+<span class="out">gitleaks on this diff: 0 findings — the secrets live in fields named</span>
+<span class="out">_aws, _fallback, DB, so keyword scanners skip them.  leakproof: 3 caught,</span>
+<span class="out">rules-only, no model.  audit → ~/.local/share/leakproof/audit.jsonl</span>
+<span class="ok">✓ Claude Code still works. Your keys never left the machine.</span></div>
+    </div>
+  </header>
+
+  <section id="dashboard">
+    <h2>One dashboard. Everything your tools tried to send.</h2>
+    <p class="lead"><code>leakproof watch</code> — a live audit of every catch across every AI tool you run. The preview is always the <em>redacted</em> snippet; the raw secret never appears, not even here.</p>
+    <div class="term">
+      <div class="term-bar">
+        <span style="background:#f85149"></span>
+        <span style="background:#f0b72f"></span>
+        <span style="background:#3fb950"></span>
+      </div>
+      <div class="term-body"><span class="flag">  LEAKPROOF  —  nothing leaves the building</span>
+<span class="flag">  🔒  10 secrets stopped from leaving your machine</span>
+<span class="out">  10 requests inspected  ·  3 blocked  ·  4 redacted  ·  3 clean  ·  85.7 KB kept in</span>
+<span class="out">     secrets 7   pii 2   files 1</span>
+<span class="out">  ──────────────────────────────────────────────────────────────</span>
+<span class="out">  time      source  tool          action     caught                  detail</span>
+<span class="flag">  13:43:35  proxy   aider         BLOCKED    private_key [critical]   -----BEGIN PRIVATE KE…</span>
+<span class="hl">  13:42:55  proxy   claude-code   REDACTED   github_token [critical]  $ gh auth login --wit…</span>
+<span class="flag">  13:42:15  hook    git           BLOCKED    stripe_key [critical]    STRIPE_SECRET_KEY=sk_…</span>
+<span class="flag">  13:41:35  proxy   claude-code   BLOCKED    aws_secret_key [crit]    ...deploy with AWS_SE…</span>
+<span class="out">  by tool:  claude-code 3   ·  cursor 3   ·  aider 3   ·  git 1</span></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <h2>What it does</h2>
+    <p class="lead">No CA install for the MVP — it intercepts via the same proxy/base-URL env the tools already respect.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ic">🔎</div>
+        <h3>See every byte</h3>
+        <p>A live TUI of every outbound request your AI tool makes — which file, which secret, which endpoint. The screenshot nobody wants to see about their own setup.</p>
+      </div>
+      <div class="card">
+        <div class="ic">✂️</div>
+        <h3>Redact or block</h3>
+        <p>Deterministic scanner catches API keys, tokens, <code>.env</code> values, PII and whole-file dumps — and strips them before they leave. The tool keeps working; the secret doesn't travel.</p>
+      </div>
+      <div class="card">
+        <div class="ic">📋</div>
+        <h3>Prove it</h3>
+        <p>Every catch lands in a tamper-evident audit log. Wire it into CI as a gate: <em>"no secret left the building."</em> Exactly what compliance asks for.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <h2>Why this has to be local</h2>
+    <p class="lead">A tool that scans your traffic for secrets can't itself be a cloud service — that would just leak the secret somewhere else. Local isn't a feature here, it's the only sane architecture.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">🏦</div><h3>Compliance can say yes</h3><p>Banks, health, defense, EU shops are told they can't pipe source to OpenAI. leakproof is the control that lets them adopt AI tooling at all.</p></div>
+      <div class="card"><div class="ic">🔒</div><h3>Zero new trust</h3><p>It runs on localhost. There's no leakproof server to send your secrets to — that's the whole point.</p></div>
+      <div class="card"><div class="ic">🧩</div><h3>Tool-agnostic</h3><p>Claude Code, Cursor, Copilot, aider — anything that talks HTTP through a proxy. One control plane for all of them.</p></div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2>Pricing</h2>
+    <p class="lead">The CLI is free and open source forever. Teams pay for shared policy + audit at scale.</p>
+    <div class="pricing">
+      <div class="tier">
+        <h3>OSS</h3>
+        <div class="price">$0</div>
+        <ul>
+          <li>Full local proxy + redaction</li>
+          <li>Live TUI + local audit log</li>
+          <li>All tool adapters</li>
+          <li>MIT licensed</li>
+        </ul>
+      </div>
+      <div class="tier feat">
+        <h3>Team</h3>
+        <div class="price">$12<span style="font-size:15px;color:var(--muted)">/dev/mo</span></div>
+        <ul>
+          <li>Shared org-wide redaction policies</li>
+          <li>Central, tamper-evident audit log</li>
+          <li>CI gate ("no secret left the building")</li>
+          <li>SSO + role-based policy</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h3>Enterprise</h3>
+        <div class="price">Contact</div>
+        <ul>
+          <li>Self-hosted control plane</li>
+          <li>Custom detectors + DLP rules</li>
+          <li>Compliance reporting (SOC2/HIPAA)</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="install">
+    <h2>Install</h2>
+    <p class="lead">One binary. Nothing to sign up for — there's no cloud to sign up to.</p>
+    <code>curl -fsSL https://leakproof.sh/install | sh</code>
+    <p style="margin-top:28px;">
+      <a class="btn btn-primary" href="https://github.com/hamstudios" target="_blank" rel="noopener">★ Star on GitHub</a>
+    </p>
+  </section>
+
+  <footer>
+    <div class="brand">leakproof<span class="dot">.</span></div>
+    <p style="margin-top:8px;">Local-first developer security. Built by <strong>hamstudios</strong>.</p>
+    <p style="margin-top:6px;"><a href="https://github.com/hamstudios">github.com/hamstudios</a></p>
+  </footer>
+
+</body>
+</html>
