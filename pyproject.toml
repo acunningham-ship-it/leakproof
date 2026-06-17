@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Local-first leak firewall for developers — see and redact exactly what your AI tools send to the cloud."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 authors = [{ name = "hamstudios" }]
 keywords = ["security", "dlp", "secrets", "redaction", "local-first", "ai", "privacy", "proxy", "pre-commit"]
 classifiers = [
