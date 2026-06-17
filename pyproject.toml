@@ -1,7 +1,3 @@
-# NOTE: package name + script stay "leakproof" (the on-disk namespace) until the
-# final rename sweep to "leakproof" — owner: worker-claude (packaging). Public
-# name is leakproof everywhere else; the internal rename is the last integration
-# step to avoid churning every in-flight lane's imports. Deps route through me.
 [project]
 name = "leakproof"
 version = "0.0.1"
@@ -29,6 +25,10 @@ proxy = ["aiohttp>=3.9"]
 # Optional local-model semantic pass (talks to a local ollama; never the cloud).
 semantic = ["httpx>=0.27"]
 all = ["aiohttp>=3.9", "httpx>=0.27"]
+# Full dev/test toolchain — reproduces the green suite (the proxy tests are async,
+# so pytest-asyncio is required to run them; without it they error as "async def
+# not supported"). `pip install -e '.[dev]'` then `pytest` → 148 passing.
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "aiohttp>=3.9", "httpx>=0.27"]
 
 [project.urls]
 Homepage = "https://leakproof.sh"

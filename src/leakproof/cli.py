@@ -279,7 +279,7 @@ def build_parser() -> argparse.ArgumentParser:
     rp.add_argument("--no-proxy", action="store_true",
                     help="don't auto-start the proxy (assume one is already running)")
     rp.add_argument("--mode", choices=["monitor", "redact", "block"], default="redact",
-                    help="monitor=log only · redact=mask secrets before forwarding · block=refuse (default)")
+                    help="monitor=log only · redact=mask secrets before forwarding (default) · block=refuse")
     rp.add_argument("cmd", nargs=argparse.REMAINDER,
                     help="-- <tool> [args...] (everything after -- is the child command)")
     rp.set_defaults(func=cmd_run)
@@ -288,7 +288,7 @@ def build_parser() -> argparse.ArgumentParser:
     pp.add_argument("--host", default="127.0.0.1")
     pp.add_argument("--port", type=int, default=8747)
     pp.add_argument("--mode", choices=["monitor", "redact", "block"], default="redact",
-                    help="monitor=log only · redact=mask secrets before forwarding · block=refuse (default)")
+                    help="monitor=log only · redact=mask secrets before forwarding (default) · block=refuse")
     pp.set_defaults(func=cmd_proxy)
 
     wp = sub.add_parser("watch", help="live TUI of intercepted egress (the dashboard)")

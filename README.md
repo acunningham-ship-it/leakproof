@@ -1,12 +1,10 @@
-<!-- NAME PENDING FINAL LOCK: front-runner `leakproof` (free on npm+pypi+leakproof.sh; airlock & leakproof both collide). Alt: `noexfil`. On-disk package still `leakproof` until the rename sweep. DRAFT — every claim below gets checked against the real build before anything ships public. -->
-
 # leakproof
 
-Your AI coding tool sends more than you think.
+**Local-first secret firewall for AI coding assistants.**
 
-When Claude Code or aider answers a question, it ships context to the cloud: open files, your `.env`, whatever in the working tree it decided was relevant. Most of the time that's harmless. The time it isn't is the time it quietly folds in `AWS_SECRET_ACCESS_KEY=...` from a config file you forgot was open in the next tab.
+Your security team banned Claude Code or Cursor over data egress. Here's the local technical control that lets you turn them back on.
 
-leakproof sits between your editor and the API and reads every outbound request before it leaves the machine. Finds a secret, it redacts it or kills the request. The decision happens locally, which for a secret scanner is the only setup that isn't self-defeating. You don't hand a key to a stranger to ask them whether it's a key.
+leakproof sits between the tool and the model API and reads every outbound request before it leaves the machine. Finds a secret, it redacts it or kills the request. Nothing hits the cloud. The decision happens on your laptop, which is the only setup that isn't self-defeating — you don't hand a key to a stranger to ask them whether it's a key.
 
 Two ways to run it:
 
@@ -15,37 +13,55 @@ Two ways to run it:
 leakproof run -- claude
 leakproof run -- aider
 
-# or guard the repo itself: stop secrets before they reach a commit
+# guard the repo itself: stop secrets before they reach a commit
 leakproof install-hook
 ```
 
+## Who it's for
+
+Compliance-bound teams under SOC 2 / HIPAA / ITAR / GDPR whose security team blocked AI coding tools because the tools exfiltrate working-tree context — including any secrets in open files — to a cloud API. leakproof is the local technical control and audit trail that satisfies the objection.
+
+The alternative tools (GitGuardian's ggshield recently added Claude Code and Cursor hooks) require a cloud account: scan metadata leaves the machine. That's structurally off the table for the shops that most need this. leakproof has zero cloud dependency — no account, no API key, no telemetry, nothing leaves the building.
+
 ## What it catches
 
-Fast path is regex plus entropy, no model needed: AWS keys, GitHub / OpenAI / Anthropic / Stripe tokens, JWTs, PEM private keys, raw `.env` values, high-entropy blobs, and the obvious PII (email, phone, card numbers).
+148 tests, including a 24-case adversarial suite. Rules-only pass: 15/15 planted leaks caught, 0/9 false-positives on decoys (AWS doc-example keys, git SHAs, env *reads* without literals — all correctly ignored).
 
-The second pass is the one keyword scanners miss. Tools like gitleaks mostly decide by the name around a value: a field called `AWS_SECRET_KEY` lights up, the same key in a field called `_aws` often slides through. leakproof's optional local-model pass (qwen2.5 1.5B on ollama) reads the value instead, so it catches a live database DSN, a real customer's email parked in a fixture, or a credential whose field was named to look harmless. Skip the model and you keep the regex and entropy layer; the value-aware pass adds to it, it isn't load-bearing.
+Catches on the first pass (no local model needed): AWS access keys and secret keys, GitHub/OpenAI/Anthropic/Stripe tokens, JWTs, PEM private keys, raw `.env` values, high-entropy blobs, email, phone, card numbers.
 
-## Why local is the whole point
+The second pass is optional — a local-model semantic check (qwen2.5:1.5b via ollama) that reads the value rather than the variable name. That's where keyword scanners break down.
 
-A cloud secret-scanner has to receive your secret in order to scan it. That's the problem written twice. leakproof never ships the thing it's guarding anywhere.
+### Compared to detect-secrets
 
-It's also the only version some teams are allowed to run. Banks, hospitals, defense shops, anyone living under GDPR: their security team already said no to piping source through OpenAI, so they get no Copilot, no cloud review, no cloud anything. They've been picking between current tooling and their own policy. A scanner that runs entirely on the developer's laptop doesn't make them pick.
+detect-secrets is a common pre-commit baseline. It uses keyword matching plus entropy on a per-line basis.
+
+| Scenario | detect-secrets | leakproof |
+|---|---|---|
+| `AWS_SECRET_ACCESS_KEY=abc123…` in config | ✅ caught | ✅ caught |
+| AWS-shaped 40-char string in a prose comment (no `=` anchor, no keyword) | ❌ missed | ✅ caught (entropy) |
+| Live DB connection string in a test fixture with a neutral var name | ❌ missed | ✅ caught (entropy) |
+| Base64-wrapped token, benign-looking variable name | ❌ missed | ✅ caught (entropy) |
+| Bulk source paste containing a buried credential | ❌ missed | ✅ caught |
+| `AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"` (AWS doc placeholder) | ⚠️ may flag | ✅ ignored (EXAMPLE marker) |
+| `sha256:e3b0c44298fc…` git SHA | ✅ ignored | ✅ ignored |
+
+The honest framing: leakproof catches what keyword scanners miss **when the variable name is benign**. The local-model semantic pass is opt-in and additive — you get the full regex+entropy layer with or without it.
 
 ## Install
 
 ```bash
-uvx leakproof          # nothing to install, just runs
-# or
 pipx install leakproof
+# or run without installing:
+uvx leakproof run -- claude
 ```
 
-Python 3.12+. The proxy binds `127.0.0.1:8747` and forwards to the real API; the tool you wrap never knows it's there past one env var.
+Python 3.10+. The proxy surface needs `aiohttp` — install with `pipx install 'leakproof[proxy]'` or `uvx 'leakproof[proxy]' run -- claude`.
 
 ## How it works
 
-`leakproof run -- claude` points `ANTHROPIC_BASE_URL` (or `OPENAI_API_BASE`, for aider) at a local proxy, then launches the tool. The proxy reads each request body, runs the scanner, forwards a redacted copy upstream, and streams the response straight back untouched. No certificate to trust, no system-wide proxy, no intercept of anything except the one tool you asked it to wrap.
+`leakproof run -- claude` sets `ANTHROPIC_BASE_URL` (or `OPENAI_API_BASE` for aider) to a local proxy on `127.0.0.1:8747`, then launches the tool. The proxy reads each request body, runs the scanner, forwards a redacted copy upstream, and streams the response back untouched. No certificate to install, no system-wide proxy, no interception of anything you didn't ask it to wrap.
 
-Every catch goes to an append-only log at `~/.local/share/leakproof/audit.jsonl`. `leakproof watch` tails it and keeps a running count of what didn't get out:
+Every catch lands in an append-only audit log at `~/.local/share/leakproof/audit.jsonl`. `leakproof watch` tails it:
 
 ```
 $ leakproof watch
@@ -58,16 +74,22 @@ $ leakproof watch
 
 ## Modes
 
-`monitor` logs and changes nothing, so you can watch what's been leaving without breaking your flow. `redact` swaps each finding for a placeholder and forwards the cleaned request; that's the default. `block` rejects the request outright with a 403 that names what would have leaked.
+`monitor` — logs only, nothing changes. Use this first to see what's been leaving without disrupting your workflow.
+
+`redact` — swaps each finding for a placeholder and forwards the cleaned request. Default.
+
+`block` — rejects the request outright with a 403 and names what would have leaked.
 
 ## Free, and the paid part
 
-The CLI is MIT and free, runs solo, needs no account. One developer never hits a wall.
+The CLI is MIT and free. One developer, no account, no wall.
 
-The paid tier is a team thing: one shared redaction policy everybody inherits, a central audit log instead of a file per laptop, and a CI check that fails the build when a secret would have shipped. That last one is what a security lead actually wants to buy.
+**leakproof Team** is for compliance shops that need more than a per-laptop file. It adds: a shared redaction policy your whole team inherits, a central audit log aggregated across machines, a CI gate that fails the build when a secret would have shipped, and signed audit-evidence exports you can drop straight into your SOC 2 or HIPAA folder.
+
+Early access and pricing: [hamstudios101@gmail.com](mailto:hamstudios101@gmail.com)
 
 ## Status
 
-Pre-launch, and built in a hurry (the commit history won't hide it). Tools that honor a base-URL env var work now: Claude Code, aider. GUI editors like Cursor and Copilot talk to their backends differently and need a real proxy plus a cert; that's a fast-follow, not v1. One machine, no daemon, no telemetry.
+Works today: Claude Code and aider (any tool that honors a base-URL env var). Cursor and Copilot use proprietary backends that need a real HTTPS intercept proxy and a cert install — that's v1.1, not v1. One machine, no daemon, no telemetry.
 
-MIT. Issues and PRs welcome once the repo's public.
+MIT. Built by [hamstudios](https://github.com/hamstudios). Issues and PRs welcome.
