@@ -25,7 +25,7 @@ The alternative tools (GitGuardian's ggshield recently added Claude Code and Cur
 
 ## What it catches
 
-148 tests, including a 24-case adversarial suite. Rules-only pass: 15/15 planted leaks caught, 0/9 false-positives on decoys (AWS doc-example keys, git SHAs, env *reads* without literals — all correctly ignored).
+148 tests, including a 23-case adversarial suite. Rules-only pass: 14/14 planted leaks caught, 0/9 false-positives on decoys (AWS doc-example keys, git SHAs, env *reads* without literals — all correctly ignored).
 
 Catches on the first pass (no local model needed): AWS access keys and secret keys, GitHub/OpenAI/Anthropic/Stripe tokens, JWTs, PEM private keys, raw `.env` values, high-entropy blobs, email, phone, card numbers.
 
@@ -49,13 +49,23 @@ The honest framing: leakproof catches what keyword scanners miss **when the vari
 
 ## Install
 
+Until the PyPI release lands, install straight from the repo — the source *is* the package:
+
 ```bash
-pipx install leakproof
-# or run without installing:
-uvx leakproof run -- claude
+# install the CLI (zero-dependency core)
+pipx install git+https://github.com/acunningham-ship-it/leakproof.git
+
+# …or run it without installing, straight from the repo:
+uvx --from git+https://github.com/acunningham-ship-it/leakproof.git leakproof run -- claude
 ```
 
-Python 3.10+. The proxy surface needs `aiohttp` — install with `pipx install 'leakproof[proxy]'` or `uvx 'leakproof[proxy]' run -- claude`.
+Python 3.10+. The proxy surface needs `aiohttp`:
+
+```bash
+pipx install "leakproof[proxy] @ git+https://github.com/acunningham-ship-it/leakproof.git"
+```
+
+`pipx install leakproof` / `uvx leakproof run -- claude` land with the PyPI release (coming soon).
 
 ## How it works
 

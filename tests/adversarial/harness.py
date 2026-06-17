@@ -93,8 +93,8 @@ def format_report(rep: Report) -> str:
     lines.append(f"  false-pass       : {len(rep.false_pass)}   (MUST be 0 — a real secret slipped through)")
     lines.append(f"  decoys clean     : {len(decoys) - len(rep.false_positive)}/{len(decoys)}")
     lines.append(f"  false-positive   : {len(rep.false_positive)}   (clean code wrongly blocked)")
-    regex_only = [r for r in rep.caught if r.case.regex_misses]
-    lines.append(f"  semantic wins    : {len(regex_only)} leak(s) caught that plain regex would miss")
+    regex_hard = [r for r in rep.caught if r.case.regex_misses]
+    lines.append(f"  regex-hard caught: {len(regex_hard)} leak(s) a keyword-only scanner would miss (entropy/structure, no model)")
     lines.append("-" * 64)
     for r in rep.false_pass:
         lines.append(f"  ✗ FALSE-PASS  [{r.case.id}] {r.case.note}")
