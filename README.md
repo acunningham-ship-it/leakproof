@@ -82,7 +82,7 @@ $ leakproof watch
 
 ## Free, and the paid part
 
-The CLI is MIT and free. One developer, no account, no wall.
+The CLI is Apache-2.0 and free. One developer, no account, no wall.
 
 **leakproof Team** is for compliance shops that need more than a per-laptop file. It adds: a shared redaction policy your whole team inherits, a central audit log aggregated across machines, a CI gate that fails the build when a secret would have shipped, and signed audit-evidence exports you can drop straight into your SOC 2 or HIPAA folder.
 
@@ -92,4 +92,4 @@ Early access and pricing: [hamstudios101@gmail.com](mailto:hamstudios101@gmail.c
 
 Works today: Claude Code and aider (any tool that honors a base-URL env var). Cursor and Copilot use proprietary backends that need a real HTTPS intercept proxy and a cert install — that's v1.1, not v1. One machine, no daemon, no telemetry.
 
-MIT. Built by [hamstudios](https://github.com/hamstudios). Issues and PRs welcome.
+Apache-2.0. Built by [hamstudios](https://github.com/hamstudios). Issues and PRs welcome.
