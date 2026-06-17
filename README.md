@@ -49,23 +49,25 @@ The honest framing: leakproof catches what keyword scanners miss **when the vari
 
 ## Install
 
-Until the PyPI release lands, install straight from the repo — the source *is* the package:
-
 ```bash
 # install the CLI (zero-dependency core)
-pipx install git+https://github.com/acunningham-ship-it/leakproof.git
+pipx install leakproof
 
-# …or run it without installing, straight from the repo:
-uvx --from git+https://github.com/acunningham-ship-it/leakproof.git leakproof run -- claude
+# …or run it without installing anything:
+uvx leakproof run -- claude
 ```
 
 Python 3.10+. The proxy surface needs `aiohttp`:
 
 ```bash
-pipx install "leakproof[proxy] @ git+https://github.com/acunningham-ship-it/leakproof.git"
+pipx install "leakproof[proxy]"
 ```
 
-`pipx install leakproof` / `uvx leakproof run -- claude` land with the PyPI release (coming soon).
+Prefer the bleeding edge? Install straight from the repo — the source *is* the package:
+
+```bash
+pipx install git+https://github.com/acunningham-ship-it/leakproof.git
+```
 
 ## How it works
 
