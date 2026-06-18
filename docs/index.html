@@ -110,6 +110,7 @@
 
   @media (max-width: 600px) { h1 { font-size: 34px; } .sub { font-size: 17px; } .term { font-size: 12.5px; } }
 </style>
+  <link rel="stylesheet" href="asciinema-player.min.css">
 </head>
 <body>
 
@@ -135,6 +136,11 @@
       <a class="btn btn-primary" href="#install">Get started</a>
       <a class="btn btn-ghost" href="https://news.ycombinator.com" target="_blank" rel="noopener">Discuss on HN ↗</a>
     </div>
+
+    <figure class="cast-demo" style="margin:28px 0 8px;">
+      <figcaption class="lead" style="margin-bottom:10px;">Watch it run — recorded &amp; reproducible. On the same files, gitleaks finds 0, leakproof finds 3.</figcaption>
+      <div id="hero-cast" style="max-width:780px;border-radius:10px;overflow:hidden;"></div>
+    </figure>
 
     <div class="term" id="demo">
       <div class="term-bar">
@@ -274,5 +280,10 @@
     <p style="margin-top:6px;"><a href="https://github.com/acunningham-ship-it/leakproof">github.com/acunningham-ship-it/leakproof</a></p>
   </footer>
 
+  <script src="asciinema-player.min.js"></script>
+  <script>
+    AsciinemaPlayer.create('leakproof-hero.cast', document.getElementById('hero-cast'),
+      { autoPlay: true, loop: true, fit: 'width', terminalFontSize: 'small', idleTimeLimit: 2 });
+  </script>
 </body>
 </html>
