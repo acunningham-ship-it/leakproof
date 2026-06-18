@@ -37,7 +37,7 @@ class TestRender(unittest.TestCase):
 
     def test_single_catch_headline(self):
         out = render_frame([_ev()], width=100)
-        self.assertIn("1 secret stopped", out)
+        self.assertIn("1 sensitive item stopped", out)
         self.assertIn("claude-code", out)
         self.assertIn("aws_secret_key", out)
         self.assertIn("REDACTED", out)
@@ -45,7 +45,7 @@ class TestRender(unittest.TestCase):
     def test_pluralization_and_totals(self):
         events = [_ev(), _ev(action="blocked", tool="cursor", ftype="private_key")]
         out = render_frame(events, width=120)
-        self.assertIn("2 secrets stopped", out)
+        self.assertIn("2 sensitive items stopped", out)
         self.assertIn("1 blocked", out)
         self.assertIn("1 redacted", out)
         self.assertIn("BLOCKED", out)
@@ -86,7 +86,7 @@ class TestRender(unittest.TestCase):
         audit.record(_ev(), path=path)
         audit.record(_ev(action="blocked", ftype="github_token"), path=path)
         out = render_frame(audit.read_events(path), width=120)
-        self.assertIn("2 secrets stopped", out)
+        self.assertIn("2 sensitive items stopped", out)
 
 
 if __name__ == "__main__":

@@ -108,7 +108,7 @@ def render_frame(events, *, width: int | None = None, limit: int = 15) -> str:
     # the shock number
     caught = t.caught
     if caught:
-        unit = "secret" if caught == 1 else "secrets"
+        unit = "sensitive item" if caught == 1 else "sensitive items"
         lines.append(_c(C.RED + C.BOLD,
                         f"\U0001f512  {caught} {unit} stopped from leaving your machine"))
     else:
