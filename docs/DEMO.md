@@ -51,12 +51,17 @@ gitleaks leans on a `generic-api-key` rule that keys off the variable name plus 
 leakproof reads the value. It recognizes an AWS key, a base64 blob that decodes to one, and a live Postgres DSN no matter what the surrounding field is called. That claim survives a hostile reader renaming things on stage; the "gitleaks finds zero" claim does not.
 
 ```
-$ gitleaks detect --source tests/fixtures/conftest.py --no-banner
-  no leaks found
+$ gitleaks detect --no-git --source .          # gitleaks v8.30.1
+  no leaks found                                # 0 findings — verified live
 
-$ leakproof scan tests/fixtures/conftest.py
-  conftest.py:9    high  db_url   live Postgres DSN (prod-db.internal)
-  conftest.py:14   high  aws_key  AWS secret key, base64-wrapped
+$ leakproof scan services/billing/config.py tests/fixtures/conftest.py
+  services/billing/config.py
+    HIGH    aws_access_key_id        AWS access key ID
+    MEDIUM  high_entropy_string      base64-wrapped key (entropy)
+  tests/fixtures/conftest.py
+    HIGH    db_url_with_credentials  live Postgres DSN (db.prod.internal)
+
+  # Same files.  gitleaks: 0.   leakproof: 3   (rules-only, no model).
 ```
 
 The value-aware catches lean on the local model, and a 1.5B will miss some; say so. Don't claim a catch rate. Keep the fixture's original field names in the demo on purpose, because the harmless-looking name is exactly what makes the point.
