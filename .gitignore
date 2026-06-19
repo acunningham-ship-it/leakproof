@@ -7,3 +7,7 @@ build/
 .leakproof/
 audit.log
 .DS_Store
+
+# local env (zero-config tool, but guard anyway)
+.env
+.env.*
