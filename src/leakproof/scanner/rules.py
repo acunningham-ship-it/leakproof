@@ -48,6 +48,8 @@ _PLACEHOLDER_LITERALS = {
     "deadbeef",
 }
 
+# Structural placeholders only (xxxx / 0000 / <...> / ${ENV}). Word-placeholders are handled by token
+# matching in _is_placeholder — NOT by prefix-wildcards, which used to swallow real secrets.
 _PLACEHOLDER_RE = re.compile(
     r"""(?ix)
     ^(?:
@@ -56,24 +58,38 @@ _PLACEHOLDER_RE = re.compile(
       | (?:\.{3,})                      # ...
       | (?:<[^>]*>)                     # <your-key-here>
       | (?:\$\{[^}]*\})                 # ${ENV_VAR}
-      | (?:your[_-]?\w+)                # your_api_key
-      | (?:my[_-]?\w+)                  # my_secret
-      | (?:(?:example|sample|dummy|placeholder|changeme|redacted|test|fake|todo)[\w-]*)
-      | (?:[\w-]*(?:example|placeholder|changeme|xxxx)[\w-]*)
     )$
     """
 )
+
+# FN-03/04 fix: a value is a word-placeholder ONLY if it tokenizes ENTIRELY into these known
+# placeholder words. So `my_api_key`, `test-token`, `YOUR_SECRET`, `example_key` suppress, but a real
+# secret that merely STARTS WITH or CONTAINS one — `myActualProductionKey`, `testEnv_RealSecret12345`,
+# `sk-ant-api03-…eXaMpLe…` — does NOT (those get caught). Replaces the old `my[_-]?\w+` / `test[\w-]*` /
+# contains-`example` wildcards, which swallowed real secrets and were an intentional-bypass vector.
+_PLACEHOLDER_WORDS = frozenset({
+    "your", "my", "our",
+    "api", "key", "keys", "secret", "secrets", "token", "tokens", "password", "passwd",
+    "pwd", "pass", "access", "credential", "credentials", "value", "here", "auth",
+    "example", "sample", "dummy", "placeholder", "changeme", "change", "me", "redacted",
+    "todo", "fixme", "test", "testing", "fake", "foo", "bar", "baz", "none", "null", "na",
+    "tbd", "xxx", "xxxx", "yyy", "zzz", "abc", "string", "insert", "goes",
+})
 
 
 def _is_placeholder(value: str) -> bool:
     v = value.strip().strip("'\"")
     if v in _PLACEHOLDER_LITERALS:
         return True
-    if "EXAMPLE" in v or "example" in v and "@example" not in v:
-        # 'EXAMPLE' embedded in an otherwise key-shaped string ⇒ doc sample.
-        if re.search(r"example", v, re.I):
-            return True
-    return bool(_PLACEHOLDER_RE.match(v))
+    if _PLACEHOLDER_RE.match(v):
+        return True
+    # masked/redacted token: a long run of a masking char (e.g. ghp_xxxx…x, ****, 0000…) ⇒ not a real
+    # secret. Thresholds are high enough that a real high-entropy secret won't trip them.
+    if re.search(r"[xX]{6,}|\*{4,}|•{4,}", v):
+        return True
+    # word-placeholder: EVERY token (split on _ - . space) must be a known placeholder word.
+    tokens = [t for t in re.split(r"[\s._-]+", v.lower()) if t]
+    return bool(tokens) and all(t in _PLACEHOLDER_WORDS for t in tokens)
 
 
 # --- entropy ------------------------------------------------------------------------
