@@ -92,13 +92,9 @@ $ leakproof watch
 
 `block` — rejects the request outright with a 403 and names what would have leaked.
 
-## Free, and the paid part
+## Free
 
-The CLI is Apache-2.0 and free. One developer, no account, no wall.
-
-**leakproof Team** is for compliance shops that need more than a per-laptop file. It adds: a shared redaction policy your whole team inherits, a central audit log aggregated across machines, a CI gate that fails the build when a secret would have shipped, and signed audit-evidence exports you can drop straight into your SOC 2 or HIPAA folder.
-
-Early access and pricing: [hamstudios101@gmail.com](mailto:hamstudios101@gmail.com)
+Apache-2.0, no paid tier, no account, no wall. One developer or a whole compliance team, same binary.
 
 ## Status
 
